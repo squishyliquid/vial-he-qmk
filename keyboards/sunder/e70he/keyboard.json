@@ -10,9 +10,6 @@
         "pid": "0x7001",
         "vid": "0x1771"
     },
-    // "build": {
-    //     "lto": true
-    // },
     "features": {
         "bootmagic": true,
         "mousekey": false,
