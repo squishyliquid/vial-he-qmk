@@ -45,6 +45,7 @@ _Static_assert(sizeof(vial_unlock_combo_rows) == sizeof(vial_unlock_combo_cols),
 #endif
 
 #include "qmk_settings.h"
+#include "hall_effect.h"
 
 #ifdef VIAL_TAP_DANCE_ENABLE
 static void reload_tap_dance(void);
@@ -58,6 +59,10 @@ static void reload_combo(void);
 static void reload_key_override(void);
 #endif
 
+#ifdef VIAL_HALL_EFFECT_ENABLE
+static void reload_hall_effect(void);
+#endif
+
 void vial_init(void) {
 #ifdef VIAL_TAP_DANCE_ENABLE
     reload_tap_dance();
@@ -67,6 +72,9 @@ void vial_init(void) {
 #endif
 #ifdef VIAL_KEY_OVERRIDE_ENABLE
     reload_key_override();
+#endif
+#ifdef VIAL_HALL_EFFECT_ENABLE
+    reload_hall_effect();
 #endif
 }
 
@@ -287,6 +295,25 @@ void vial_handle_cmd(uint8_t *msg, uint8_t length) {
 
             break;
         }
+#ifdef VIAL_HALL_EFFECT_ENABLE
+        case vial_hall_effect_get: {
+            hall_effect_t settings = { 0 };
+            msg[0] = dynamic_keymap_get_hall_effect(&settings);
+            memcpy(&msg[1], &settings, sizeof(settings));
+            break;
+        }
+        case vial_hall_effect_set: {
+            hall_effect_t settings;
+            memcpy(&settings, &msg[2], sizeof(settings));
+            msg[0] = dynamic_keymap_set_hall_effect(&settings);
+            reload_hall_effect();
+            break;
+        }
+        // case vial_hall_effect_reset: {
+        //     dynamic_keymap_reset_hall_effect();
+        //     break;
+        // }
+#endif
     }
 }
 
@@ -616,5 +643,11 @@ const key_override_t* key_override_get(uint16_t key_override_idx) {
     if (key_override_idx >= VIAL_KEY_OVERRIDE_ENTRIES)
         return NULL;
     return &vial_key_overrides[key_override_idx];
+}
+#endif
+
+#ifdef VIAL_HALL_EFFECT_ENABLE
+static void reload_hall_effect(void) {
+    dynamic_keymap_get_hall_effect(&key_settings);
 }
 #endif

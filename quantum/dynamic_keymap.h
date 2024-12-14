@@ -54,6 +54,12 @@ int dynamic_keymap_set_combo(uint8_t index, const vial_combo_entry_t *entry);
 int dynamic_keymap_get_key_override(uint8_t index, vial_key_override_entry_t *entry);
 int dynamic_keymap_set_key_override(uint8_t index, const vial_key_override_entry_t *entry);
 #endif
+#ifdef VIAL_HALL_EFFECT_ENABLE
+#include "hall_effect.h"
+int dynamic_keymap_get_hall_effect(hall_effect_t *settings);
+int dynamic_keymap_set_hall_effect(const hall_effect_t *settings);
+void dynamic_keymap_reset_hall_effect(void);
+#endif
 void     dynamic_keymap_reset(void);
 // These get/set the keycodes as stored in the EEPROM buffer
 // Data is big-endian 16-bit values (the keycodes)

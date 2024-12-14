@@ -110,9 +110,19 @@
 #define VIAL_KEY_OVERRIDE_SIZE 0
 #endif
 
+// Hall Effect
+#define VIAL_HALL_EFFECT_EEPROM_ADDR (VIAL_KEY_OVERRIDE_EEPROM_ADDR + VIAL_KEY_OVERRIDE_SIZE)
+
+#ifdef VIAL_HALL_EFFECT_ENABLE
+#include "hall_effect.h"
+#define VIAL_HALL_EFFECT_SIZE (sizeof(hall_effect_t))
+#else
+#define VIAL_HALL_EFFECT_SIZE 0
+#endif
+
 // Dynamic macro
 #ifndef DYNAMIC_KEYMAP_MACRO_EEPROM_ADDR
-#    define DYNAMIC_KEYMAP_MACRO_EEPROM_ADDR (VIAL_KEY_OVERRIDE_EEPROM_ADDR + VIAL_KEY_OVERRIDE_SIZE)
+#    define DYNAMIC_KEYMAP_MACRO_EEPROM_ADDR (VIAL_HALL_EFFECT_EEPROM_ADDR + VIAL_HALL_EFFECT_SIZE)
 #endif
 
 // Sanity check that dynamic keymaps fit in available EEPROM
@@ -265,6 +275,28 @@ int dynamic_keymap_set_key_override(uint8_t index, const vial_key_override_entry
 }
 #endif
 
+#ifdef VIAL_HALL_EFFECT_ENABLE
+int dynamic_keymap_get_hall_effect(hall_effect_t *settings) {
+    void *address = (void*)(VIAL_HALL_EFFECT_EEPROM_ADDR);
+    eeprom_read_block(settings, address, sizeof(hall_effect_t));
+
+    return 0;
+}
+int dynamic_keymap_set_hall_effect(const hall_effect_t *settings) {
+    void *address = (void*)(VIAL_HALL_EFFECT_EEPROM_ADDR);
+    eeprom_write_block(settings, address, sizeof(hall_effect_t));
+
+    return 0;
+}
+void dynamic_keymap_reset_hall_effect(void) {
+    key_settings.mode = RAPID_TRIGGER_MODE;
+    key_settings.sensitivity = SENSITIVITY;
+    key_settings.travel_distance = TRAVEL_DISTANCE;
+    key_settings.actuation_point = ACTUATION_POINT;
+    dynamic_keymap_set_hall_effect(&key_settings);
+}
+#endif
+
 void dynamic_keymap_reset(void) {
 #ifdef VIAL_ENABLE
     /* temporarily unlock the keyboard so we can set hardcoded QK_BOOT keycode */
@@ -310,6 +342,10 @@ void dynamic_keymap_reset(void) {
     ko.options = vial_ko_option_activation_negative_mod_up | vial_ko_option_activation_required_mod_down | vial_ko_option_activation_trigger_down;
     for (size_t i = 0; i < VIAL_KEY_OVERRIDE_ENTRIES; ++i)
         dynamic_keymap_set_key_override(i, &ko);
+#endif
+
+#ifdef VIAL_HALL_EFFECT_ENABLE
+    dynamic_keymap_reset_hall_effect();
 #endif
 
 #ifdef VIAL_ENABLE

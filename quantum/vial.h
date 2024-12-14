@@ -48,6 +48,9 @@ enum {
     vial_qmk_settings_set = 0x0B,
     vial_qmk_settings_reset = 0x0C,
     vial_dynamic_entry_op = 0x0D,  /* operate on tapdance, combos, etc */
+    vial_hall_effect_get = 0x0E,
+    vial_hall_effect_set = 0x0F,
+    vial_hall_effect_reset = 0x10,
 };
 
 enum {
@@ -180,4 +183,8 @@ enum {
 #else
 #undef VIAL_KEY_OVERRIDE_ENTRIES
 #define VIAL_KEY_OVERRIDE_ENTRIES 0
+#endif
+
+#ifdef HALL_EFFECT_ENABLE
+#define VIAL_HALL_EFFECT_ENABLE
 #endif
