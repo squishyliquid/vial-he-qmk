@@ -7,12 +7,6 @@ enum layer_names {
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
-    /*
-     * ┌───┬───┬───┬───┐
-     * │ N │ I │ C │ E │
-     * └───┴───┴───┴───┘
-     */
-    /* Base */
     [_BASE] = LAYOUT(
         KC_ESC,  KC_GRV,  KC_1,    KC_2,    KC_3,    KC_4,    KC_5,    KC_DEL,  KC_TAB,  KC_Q,                               \
         KC_W,    KC_E,    KC_R,    KC_T,    KC_PGUP, KC_CAPS, KC_A,    KC_S,    KC_D,    KC_F,    KC_G,                      \

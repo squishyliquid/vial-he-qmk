@@ -2,6 +2,7 @@
     "manufacturer": "Sunder",
     "keyboard_name": "E70 HE",
     "maintainer": "squishyliquid",
+    "board": "GENERIC_RP_RP2040",
     "bootloader": "rp2040",
     "processor": "RP2040",
     "url": "",
@@ -16,6 +17,28 @@
         "extrakey": false,
         "console": true,
         "command": false
+    },
+    "matrix_pins": {
+        "custom": true,
+        "rows": ["GP26", "GP27", "GP28"],
+        "cols": [null, null, null, null, null, null, null, null, null, null, null, null, null]
+    },
+    "split": {
+        "enabled": true,
+        "handedness": {
+            "pin": "GP11"
+        },
+        "serial": {
+            "driver": "vendor"
+        },
+        "transport": {
+            "watchdog": true
+        },
+        "usb_detect": {
+            "enabled": true,
+            "polling_interval": 10,
+            "timeout": 500
+        }
     },
     "layouts": {
         "LAYOUT": {
