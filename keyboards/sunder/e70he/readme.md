@@ -1,6 +1,6 @@
 # Sunder E70 HE
 
-![Sunder E70 HE](https://i.imgur.com/4Yicm9C.jpeg)
+![Sunder E70 HE](https://i.imgur.com/5FkyZsX.jpeg)
 
 A hall effect split ortho keyboard that is compatible with Gateron KS-20T (Magnetic Jade) hall effect switch.
 
