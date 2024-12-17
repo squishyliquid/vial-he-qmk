@@ -1,12 +1,12 @@
 # Sunder E70 HE
 
-![Sunder E70 HE](imgur.com image replace me!)
+![Sunder E70 HE](https://i.imgur.com/4Yicm9C.jpeg)
 
 A hall effect split ortho keyboard that is compatible with Gateron KS-20T (Magnetic Jade) hall effect switch.
 
 * Keyboard Maintainer: [squishyliquid](https://github.com/squishyliquid)
 * Hardware Supported: Sunder E70 HE
-* Hardware Availability: [Sunder](sunderkeyboards.com)
+* Hardware Availability: [Sunder](https://sunderkeyboards.com/)
 
 Make example for this keyboard (after setting up your build environment):
 
