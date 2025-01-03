@@ -146,6 +146,16 @@ void initialise_hall_sensors(void) {
             wait_us(10);
             
             for (uint8_t r = 0; r < ROWS_PER_HAND; r++) {
+                if (is_keyboard_left()) {
+                    if ((r == 0 && (c == 0 || c == 7 || c == 12)) ||
+                        (r == 1 && (c == 11 || c == 12)) ||
+                        (r == 2 && c == 0)) {
+                        continue;
+                    }
+                } else if (c == 12 && (r == 0 || r == 1)) {
+                    continue;
+                }
+
                 uint16_t analogValue = analogReadPin(row_pins[r]);
 
                 if (i == 2) {
@@ -302,6 +312,16 @@ uint8_t matrix_scan(void) {
         wait_us(10);
         
         for (uint8_t row_index = 0; row_index < ROWS_PER_HAND; row_index++) {
+            if (is_keyboard_left()) {
+                if ((row_index == 0 && (col_index == 0 || col_index == 7 || col_index == 12)) ||
+                    (row_index == 1 && (col_index == 11 || col_index == 12)) ||
+                    (row_index == 2 && col_index == 0)) {
+                    continue;
+                }
+            } else if (col_index == 12 && (row_index == 0 || row_index == 1)) {
+                continue;
+            }
+
             analog_key_t *key = &keys[row_index][col_index];
             uint16_t analogValue = analogReadPin(row_pins[row_index]);
             

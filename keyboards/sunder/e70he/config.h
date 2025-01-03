@@ -3,7 +3,7 @@
 
 #pragma once
 
-#define DEBUG_MATRIX_SCAN_RATE //
+// #define DEBUG_MATRIX_SCAN_RATE //
 #define ADC_RESOLUTION ADC_CFGR1_RES_12BIT
 
 // #define SPLIT_HAND_PIN GP11
