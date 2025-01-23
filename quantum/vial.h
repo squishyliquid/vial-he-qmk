@@ -48,9 +48,11 @@ enum {
     vial_qmk_settings_set = 0x0B,
     vial_qmk_settings_reset = 0x0C,
     vial_dynamic_entry_op = 0x0D,  /* operate on tapdance, combos, etc */
-    vial_hall_effect_get = 0x0E,
-    vial_hall_effect_set = 0x0F,
-    vial_hall_effect_reset = 0x10,
+    vial_hall_effect_get_key_config = 0x0E,
+    vial_hall_effect_set_key_config = 0x0F,
+    vial_hall_effect_get_user_config = 0x10,
+    vial_hall_effect_set_user_config = 0x11,
+    vial_hall_effect_reset = 0x12,
 };
 
 enum {

@@ -4,7 +4,7 @@
 
 #define MIN_MAX_BUFFER 5
 
-#define RESET_POINT 10
+// #define RESET_POINT 0
 
 #ifndef RAPID_TRIGGER_MODE
 #   define RAPID_TRIGGER_MODE 1
@@ -23,14 +23,17 @@
 #endif
 
 typedef struct {
-    uint8_t mode;
-    uint8_t sensitivity;
-    uint16_t travel_distance;
     uint16_t actuation_point;
-} hall_effect_t;
-_Static_assert(sizeof(hall_effect_t) == 6, "Unexpected size of the hall_effect_t structure");
+    uint8_t mode; //0 = no rapid trigger, 1 = rapid trigger, 2 = continuous rapid trigger
+} key_config_t;
 
-extern hall_effect_t key_settings;
+typedef struct {
+    uint16_t travel_distance;
+    uint16_t sensitivity;
+    key_config_t key_config[MATRIX_ROWS][MATRIX_COLS];
+} user_config_t;
+
+extern user_config_t user_config;
 
 typedef struct {
     bool dynamic_actuation;

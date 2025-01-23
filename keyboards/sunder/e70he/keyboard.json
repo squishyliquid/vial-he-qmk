@@ -9,14 +9,16 @@
     "usb": {
         "device_version": "1.0.0",
         "pid": "0x7001",
-        "vid": "0x1771"
+        "vid": "0x1771",
+        "force_nkro": true
     },
     "features": {
         "bootmagic": true,
         "mousekey": false,
-        "extrakey": false,
+        "extrakey": true,
         "console": true,
-        "command": false
+        "command": false,
+        "nkro": true
     },
     "matrix_pins": {
         "custom": true,

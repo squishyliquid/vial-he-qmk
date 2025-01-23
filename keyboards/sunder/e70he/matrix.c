@@ -324,6 +324,8 @@ uint8_t matrix_scan(void) {
 
             analog_key_t *key = &keys[row_index][col_index];
             uint16_t analogValue = analogReadPin(row_pins[row_index]);
+
+            key_config_t *config = &user_config.key_config[row_index + thisHand][col_index]; 
             
             #if defined(DEBUG_MATRIX_SCAN_RATE)
             key->test_value = analogValue;
@@ -466,15 +468,23 @@ uint8_t matrix_scan(void) {
             if (curr_pos_r > (upper_limit - lower_limit) >> 1)
                 key->curr_pos += 1;
 
+            uint16_t reset_point = config->actuation_point - 10;
+            if (config->mode == 2) {
+                reset_point = 10;
+                if (config->actuation_point == 10) {
+                    reset_point = 0;
+                }
+            }
+
             // Update key states
-            if (key_settings.mode == 1) {
+            if (config->mode != 0) {
                 // Rapid Trigger mode enabled
                 if (key->dynamic_actuation) {
                     if (curr_matrix[row_index] & (1 << col_index)) {
                         // Key is 'pressed'
                         if (key->curr_pos > key->prev_pos) {
                             key->prev_pos = key->curr_pos;
-                        } else if (key->curr_pos < key->prev_pos - key_settings.sensitivity) {
+                        } else if (key->curr_pos < key->prev_pos - user_config.sensitivity) {
                             curr_matrix[row_index] &= ~(1 << col_index);
                             key->prev_pos = key->curr_pos;
                         }
@@ -482,18 +492,18 @@ uint8_t matrix_scan(void) {
                         // Key is 'not pressed'
                         if (key->curr_pos < key->prev_pos) {
                             key->prev_pos = key->curr_pos;
-                        } else if (key->curr_pos > key->prev_pos + key_settings.sensitivity) {
+                        } else if (key->curr_pos > key->prev_pos + user_config.sensitivity) {
                             curr_matrix[row_index] |= (1 << col_index);
                             key->prev_pos = key->curr_pos;
                         }
                     }
-                    if (key->curr_pos < RESET_POINT) {
+                    if (key->curr_pos <= reset_point) {
                         // Key is above reset point
                         curr_matrix[row_index] &= ~(1 << col_index);
                         key->prev_pos = key->curr_pos;
                         key->dynamic_actuation = false;
                     } 
-                } else if (key->curr_pos > key_settings.actuation_point) {
+                } else if (key->curr_pos > config->actuation_point) {
                     curr_matrix[row_index] |= (1 << col_index);
                     key->prev_pos = key->curr_pos;
                     key->dynamic_actuation = true;
@@ -502,12 +512,12 @@ uint8_t matrix_scan(void) {
                 // Rapid Trigger mode disabled
                 if (curr_matrix[row_index] & (1 << col_index)) {
                     // Key is 'pressed'
-                    if (key->curr_pos < key_settings.actuation_point - 10) {
+                    if (key->curr_pos < config->actuation_point - 10) {
                         curr_matrix[row_index] &= ~(1 << col_index);
                     }
                 } else {
                     // Key is 'not pressed'
-                    if (key->curr_pos > key_settings.actuation_point) {
+                    if (key->curr_pos > config->actuation_point) {
                         curr_matrix[row_index] |= (1 << col_index);
                     }
                 }
@@ -521,39 +531,87 @@ uint8_t matrix_scan(void) {
     if (TIMER_DIFF_32(timer_now, matrix_timer) >= 500) {
         
         uprintf("matrix scan rate: %lu\n", get_matrix_scan_rate());
-        
-        for (uint8_t row_index = 0; row_index < ROWS_PER_HAND; row_index++) {
-            // for (uint8_t col_index = 0; col_index < MATRIX_COLS; col_index++) {
-            //     uprintf("[(%u,%u): %u] ", row_index, col_index, keys[row_index][col_index].test_value);
-            // }
+        if (is_keyboard_left()) {
+            uprintf("(%u, %u) ", keys[0][3].max_value, keys[0][3].test_value);
+            uprintf("(%u, %u) ", keys[0][2].max_value, keys[0][2].test_value);
+            uprintf("(%u, %u) ", keys[0][1].max_value, keys[0][1].test_value);
+            uprintf("(%u, %u) ", keys[0][11].max_value, keys[0][11].test_value);
+            uprintf("(%u, %u) ", keys[0][10].max_value, keys[0][10].test_value);
+            uprintf("(%u, %u) ", keys[0][9].max_value, keys[0][9].test_value);
+            uprintf("(%u, %u)\n", keys[0][8].max_value, keys[0][8].test_value);
 
-            uprintf("[");
-            for (uint8_t col_index = 0; col_index < MATRIX_COLS; col_index++) {
-                uprintf("(%u, %u) ", keys[row_index][col_index].max_value, keys[row_index][col_index].test_value);
-            }
-            uprintf("]");
-            
-            // uprintf("[");
-            // for (uint8_t col_index = 0; col_index < MATRIX_COLS; col_index++) {
-            //     uprintf("(%u, %u, %u) ", keys[row_index][col_index].max_value, keys[row_index][col_index].test_value, keys[row_index][col_index].curr_pos);
-            // }
-            // uprintf("]");
+            uprintf("(%u, %u) ", keys[0][4].max_value, keys[0][4].test_value);
+            uprintf("(%u, %u) ", keys[0][5].max_value, keys[0][5].test_value);
+            uprintf("(%u, %u) ", keys[0][6].max_value, keys[0][6].test_value);
+            uprintf("(%u, %u) ", keys[1][7].max_value, keys[1][7].test_value);
+            uprintf("(%u, %u) ", keys[1][6].max_value, keys[1][6].test_value);
+            uprintf("(%u, %u) ", keys[1][5].max_value, keys[1][5].test_value);
+            uprintf("(%u, %u)\n", keys[1][4].max_value, keys[1][4].test_value);
 
-            // uprintf("[");
-            // for (uint8_t col_index = 0; col_index < MATRIX_COLS; col_index++) {
-            //     uprintf("%u ", keys[row_index][col_index].curr_pos);
-            // }
-            // uprintf("]");
-            
-            uprintf("\n");
+            uprintf("(%u, %u) ", keys[1][8].max_value, keys[1][8].test_value);
+            uprintf("(%u, %u) ", keys[1][9].max_value, keys[1][9].test_value);
+            uprintf("(%u, %u) ", keys[1][10].max_value, keys[1][10].test_value);
+            uprintf("(%u, %u) ", keys[1][0].max_value, keys[1][0].test_value);
+            uprintf("(%u, %u) ", keys[1][1].max_value, keys[1][1].test_value);
+            uprintf("(%u, %u) ", keys[1][2].max_value, keys[1][2].test_value);
+            uprintf("(%u, %u)\n", keys[1][3].max_value, keys[1][3].test_value);
+
+            uprintf("(%u, %u) ", keys[2][10].max_value, keys[2][10].test_value);
+            uprintf("(%u, %u) ", keys[2][9].max_value, keys[2][9].test_value);
+            uprintf("(%u, %u) ", keys[2][8].max_value, keys[2][8].test_value);
+            uprintf("(%u, %u) ", keys[2][7].max_value, keys[2][7].test_value);
+            uprintf("(%u, %u) ", keys[2][6].max_value, keys[2][6].test_value);
+            uprintf("(%u, %u) ", keys[2][5].max_value, keys[2][5].test_value);
+            uprintf("(%u, %u)\n", keys[2][4].max_value, keys[2][4].test_value);
+
+            uprintf("(%u, %u) ", keys[2][11].max_value, keys[2][11].test_value);
+            uprintf("(%u, %u) ", keys[2][12].max_value, keys[2][12].test_value);
+            uprintf("(%u, %u) ", keys[2][1].max_value, keys[2][1].test_value);
+            uprintf("(%u, %u) ", keys[2][2].max_value, keys[2][2].test_value);
+            uprintf("(%u, %u)\n\n", keys[2][3].max_value, keys[2][3].test_value);
+        } else {
+            uprintf("(%u, %u) ", keys[0][3].max_value, keys[0][3].test_value);
+            uprintf("(%u, %u) ", keys[0][2].max_value, keys[0][2].test_value);
+            uprintf("(%u, %u) ", keys[0][1].max_value, keys[0][1].test_value);
+            uprintf("(%u, %u) ", keys[0][0].max_value, keys[0][0].test_value);
+            uprintf("(%u, %u) ", keys[0][11].max_value, keys[0][11].test_value);
+            uprintf("(%u, %u) ", keys[0][10].max_value, keys[0][10].test_value);
+            uprintf("(%u, %u) ", keys[0][9].max_value, keys[0][9].test_value);
+            uprintf("(%u, %u)\n", keys[0][8].max_value, keys[0][8].test_value);
+
+            uprintf("(%u, %u) ", keys[0][4].max_value, keys[0][4].test_value);
+            uprintf("(%u, %u) ", keys[0][5].max_value, keys[0][5].test_value);
+            uprintf("(%u, %u) ", keys[0][6].max_value, keys[0][6].test_value);
+            uprintf("(%u, %u) ", keys[0][7].max_value, keys[0][7].test_value);
+            uprintf("(%u, %u) ", keys[1][7].max_value, keys[1][7].test_value);
+            uprintf("(%u, %u) ", keys[1][6].max_value, keys[1][6].test_value);
+            uprintf("(%u, %u) ", keys[1][5].max_value, keys[1][5].test_value);
+            uprintf("(%u, %u)\n", keys[1][4].max_value, keys[1][4].test_value);
+
+            uprintf("(%u, %u) ", keys[1][8].max_value, keys[1][8].test_value);
+            uprintf("(%u, %u) ", keys[1][10].max_value, keys[1][10].test_value);
+            uprintf("(%u, %u) ", keys[1][11].max_value, keys[1][11].test_value);
+            uprintf("(%u, %u) ", keys[1][0].max_value, keys[1][0].test_value);
+            uprintf("(%u, %u) ", keys[1][1].max_value, keys[1][1].test_value);
+            uprintf("(%u, %u) ", keys[1][2].max_value, keys[1][2].test_value);
+            uprintf("(%u, %u)\n", keys[1][3].max_value, keys[1][3].test_value);
+
+            uprintf("(%u, %u) ", keys[1][9].max_value, keys[1][9].test_value);
+            uprintf("(%u, %u) ", keys[2][3].max_value, keys[2][3].test_value);
+            uprintf("(%u, %u) ", keys[2][2].max_value, keys[2][2].test_value);
+            uprintf("(%u, %u) ", keys[2][1].max_value, keys[2][1].test_value);
+            uprintf("(%u, %u) ", keys[2][0].max_value, keys[2][0].test_value);
+            uprintf("(%u, %u) ", keys[2][12].max_value, keys[2][12].test_value);
+            uprintf("(%u, %u)\n", keys[2][11].max_value, keys[2][11].test_value);
+
+            uprintf("(%u, %u) ", keys[2][4].max_value, keys[2][4].test_value);
+            uprintf("(%u, %u) ", keys[2][5].max_value, keys[2][5].test_value);
+            uprintf("(%u, %u) ", keys[2][6].max_value, keys[2][6].test_value);
+            uprintf("(%u, %u) ", keys[2][7].max_value, keys[2][7].test_value);
+            uprintf("(%u, %u) ", keys[2][8].max_value, keys[2][8].test_value);
+            uprintf("(%u, %u) ", keys[2][9].max_value, keys[2][9].test_value);
+            uprintf("(%u, %u)\n\n", keys[2][10].max_value, keys[2][10].test_value);
         }
-
-        // uprintf("mode: %u\n", key_settings.mode);
-        // uprintf("sensitivity: %u\n", key_settings.sensitivity);
-        // uprintf("travel distance: %u\n", key_settings.travel_distance);
-        // uprintf("actuation point: %u\n", key_settings.actuation_point);
-
-        // uprintf("size: %u\n", sizeof(hall_effect_t));
 
         matrix_timer = timer_now;
     }

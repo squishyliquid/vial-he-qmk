@@ -296,23 +296,39 @@ void vial_handle_cmd(uint8_t *msg, uint8_t length) {
             break;
         }
 #ifdef VIAL_HALL_EFFECT_ENABLE
-        case vial_hall_effect_get: {
-            hall_effect_t settings = { 0 };
-            msg[0] = dynamic_keymap_get_hall_effect(&settings);
-            memcpy(&msg[1], &settings, sizeof(settings));
+        case vial_hall_effect_get_key_config: {
+            key_config_t config;
+            uint8_t row = msg[2];
+            uint8_t col = msg[3];
+            msg[0] = dynamic_keymap_get_hall_effect_key_config(row, col, &config);
+            memcpy(&msg[1], &config, sizeof(config));
             break;
         }
-        case vial_hall_effect_set: {
-            hall_effect_t settings;
-            memcpy(&settings, &msg[2], sizeof(settings));
-            msg[0] = dynamic_keymap_set_hall_effect(&settings);
+        case vial_hall_effect_set_key_config: {
+            key_config_t config;
+            uint8_t row = msg[2];
+            uint8_t col = msg[3];
+            memcpy(&config, &msg[4], sizeof(config));
+            msg[0] = dynamic_keymap_set_hall_effect_key_config(row, col, &config);
             reload_hall_effect();
             break;
         }
-        // case vial_hall_effect_reset: {
-        //     dynamic_keymap_reset_hall_effect();
-        //     break;
-        // }
+        case vial_hall_effect_get_user_config: {
+            uint16_t config;
+            uint8_t idx = msg[2];
+            msg[0] = dynamic_keymap_get_hall_effect_user_config(idx, &config);
+            memcpy(&msg[1], &config, sizeof(config));
+            break;
+        }
+        case vial_hall_effect_set_user_config: {
+            uint16_t config;
+            uint8_t idx = msg[2];
+            memcpy(&config, &msg[3], sizeof(config));
+            msg[0] = dynamic_keymap_set_hall_effect_user_config(idx, &config);
+            reload_hall_effect();
+            break;
+        }
+    
 #endif
     }
 }
@@ -648,6 +664,13 @@ const key_override_t* key_override_get(uint16_t key_override_idx) {
 
 #ifdef VIAL_HALL_EFFECT_ENABLE
 static void reload_hall_effect(void) {
-    dynamic_keymap_get_hall_effect(&key_settings);
+    dynamic_keymap_get_hall_effect_user_config(0, &user_config.travel_distance);
+    dynamic_keymap_get_hall_effect_user_config(1, &user_config.sensitivity);
+
+    for (int row = 0; row < MATRIX_ROWS; row++) {
+        for (int col = 0; col < MATRIX_COLS; col++) {
+            dynamic_keymap_get_hall_effect_key_config(row, col, &user_config.key_config[row][col]);
+        }
+    }
 }
 #endif

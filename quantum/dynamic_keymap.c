@@ -115,7 +115,8 @@
 
 #ifdef VIAL_HALL_EFFECT_ENABLE
 #include "hall_effect.h"
-#define VIAL_HALL_EFFECT_SIZE (sizeof(hall_effect_t))
+// #define VIAL_HALL_EFFECT_SIZE (sizeof(hall_effect_t))
+#define VIAL_HALL_EFFECT_SIZE (sizeof(user_config_t))
 #else
 #define VIAL_HALL_EFFECT_SIZE 0
 #endif
@@ -276,25 +277,53 @@ int dynamic_keymap_set_key_override(uint8_t index, const vial_key_override_entry
 #endif
 
 #ifdef VIAL_HALL_EFFECT_ENABLE
-int dynamic_keymap_get_hall_effect(hall_effect_t *settings) {
-    void *address = (void*)(VIAL_HALL_EFFECT_EEPROM_ADDR);
-    eeprom_read_block(settings, address, sizeof(hall_effect_t));
-
+int dynamic_keymap_get_hall_effect_key_config(uint8_t row, uint8_t col, key_config_t *key) {
+    void *address = (void*)(VIAL_HALL_EFFECT_EEPROM_ADDR) + sizeof(uint16_t) + sizeof(uint16_t) + ((row * MATRIX_COLS + col) * sizeof(key_config_t));
+    eeprom_read_block(key, address, sizeof(key_config_t));
+    
     return 0;
 }
-int dynamic_keymap_set_hall_effect(const hall_effect_t *settings) {
-    void *address = (void*)(VIAL_HALL_EFFECT_EEPROM_ADDR);
-    eeprom_write_block(settings, address, sizeof(hall_effect_t));
 
+int dynamic_keymap_set_hall_effect_key_config(uint8_t row, uint8_t col, key_config_t *key) {
+    void *address = (void*)(VIAL_HALL_EFFECT_EEPROM_ADDR) + sizeof(uint16_t) + sizeof(uint16_t) + ((row * MATRIX_COLS + col) * sizeof(key_config_t));
+    eeprom_write_block(key, address, sizeof(key_config_t));
+    
     return 0;
 }
+
+int dynamic_keymap_get_hall_effect_user_config(uint8_t index, uint16_t *config) {
+    void *address = (void*)(VIAL_HALL_EFFECT_EEPROM_ADDR + index * sizeof(uint16_t));
+    eeprom_read_block(config, address, sizeof(uint16_t));
+    
+    return 0;
+}
+
+int dynamic_keymap_set_hall_effect_user_config(uint8_t index, uint16_t *config) {
+    void *address = (void*)(VIAL_HALL_EFFECT_EEPROM_ADDR + index * sizeof(uint16_t));
+    eeprom_write_block(config, address, sizeof(uint16_t));
+    
+    return 0;
+}
+
 void dynamic_keymap_reset_hall_effect(void) {
-    key_settings.mode = RAPID_TRIGGER_MODE;
-    key_settings.sensitivity = SENSITIVITY;
-    key_settings.travel_distance = TRAVEL_DISTANCE;
-    key_settings.actuation_point = ACTUATION_POINT;
-    dynamic_keymap_set_hall_effect(&key_settings);
+    user_config.travel_distance = TRAVEL_DISTANCE;
+    user_config.sensitivity = SENSITIVITY;
+    dynamic_keymap_set_hall_effect_user_config(0, &user_config.travel_distance);
+    dynamic_keymap_set_hall_effect_user_config(1, &user_config.sensitivity);
+
+    key_config_t key = {
+        .actuation_point = ACTUATION_POINT,
+        .mode = RAPID_TRIGGER_MODE,
+    };
+
+    for (int row = 0; row < MATRIX_ROWS; row++) {
+        for (int col = 0; col < MATRIX_COLS; col++) {
+            user_config.key_config[row][col] = key;
+            dynamic_keymap_set_hall_effect_key_config(row, col, &key);
+        }
+    }
 }
+
 #endif
 
 void dynamic_keymap_reset(void) {
