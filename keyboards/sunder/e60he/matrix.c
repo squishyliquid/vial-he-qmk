@@ -103,16 +103,10 @@ void bootmagic_scan(void) {
     uint8_t row = BOOTMAGIC_ROW;
     uint8_t col = BOOTMAGIC_COLUMN;
 
-    uint8_t row2 = BOOTMAGIC_ROW_2;
-    uint8_t col2 = BOOTMAGIC_COLUMN_2;
-
 #if defined(SPLIT_KEYBOARD) && defined(BOOTMAGIC_ROW_RIGHT) && defined(BOOTMAGIC_COLUMN_RIGHT)
     if (!is_keyboard_left()) {
         row = BOOTMAGIC_ROW_RIGHT - thisHand;
         col = BOOTMAGIC_COLUMN_RIGHT;
-
-        row2 = BOOTMAGIC_ROW_RIGHT_2 - thisHand;
-        col2 = BOOTMAGIC_COLUMN_RIGHT_2;
     }
 #endif
     ( col       & 1) ? gpio_atomic_set_pin_output_high(mux_pins[0]) : gpio_atomic_set_pin_output_low(mux_pins[0]);
@@ -121,17 +115,9 @@ void bootmagic_scan(void) {
     ((col >> 3) & 1) ? gpio_atomic_set_pin_output_high(mux_pins[3]) : gpio_atomic_set_pin_output_low(mux_pins[3]);
     wait_us(10);
 
-    uint16_t pin_1 = analogReadPin(row_pins[row]);
+    uint16_t pin = analogReadPin(row_pins[row]);
 
-    ( col2       & 1) ? gpio_atomic_set_pin_output_high(mux_pins[0]) : gpio_atomic_set_pin_output_low(mux_pins[0]);
-    ((col2 >> 1) & 1) ? gpio_atomic_set_pin_output_high(mux_pins[1]) : gpio_atomic_set_pin_output_low(mux_pins[1]);
-    ((col2 >> 2) & 1) ? gpio_atomic_set_pin_output_high(mux_pins[2]) : gpio_atomic_set_pin_output_low(mux_pins[2]);
-    ((col2 >> 3) & 1) ? gpio_atomic_set_pin_output_high(mux_pins[3]) : gpio_atomic_set_pin_output_low(mux_pins[3]);
-    wait_us(10);
-
-    uint16_t pin_2 = analogReadPin(row_pins[row2]);
-
-    if (pin_1 + pin_2 < 2900) {
+    if (pin > 2450) {
         // Jump to bootloader.
         bootloader_jump();
     }
@@ -149,39 +135,27 @@ void initialise_hall_sensors(void) {
                 wait_us(10);
                 
                 for (uint8_t r = 0; r < ROWS_PER_HAND; r++) {
-                    uint16_t analogValue = analogReadPin(row_pins[r]);
+                    uint16_t analog_value = analogReadPin(row_pins[r]);
 
                     if (keys[r][c].sma_filter[i] == 0) {
-                        keys[r][c].sma_sum += analogValue;
-                        keys[r][c].sma_filter[i] = analogValue;
+                        keys[r][c].sma_sum += analog_value;
+                        keys[r][c].sma_filter[i] = analog_value;
                     } else {
                         keys[r][c].sma_sum -= keys[r][c].sma_filter[i];
-                        keys[r][c].sma_filter[i] = analogValue;
-                        keys[r][c].sma_sum += analogValue; 
+                        keys[r][c].sma_filter[i] = analog_value;
+                        keys[r][c].sma_sum += analog_value; 
 
-                        uint16_t analog_r = keys[r][c].sma_sum % FILTER_SIZE;
-                        if (analog_r > FILTER_SIZE >> 1) {
-                            analogValue = (keys[r][c].sma_sum + (FILTER_SIZE >> 1)) >> FILTER_BITS;
-                        } else {
-                            analogValue = (keys[r][c].sma_sum) >> FILTER_BITS;
-                        }
+                        analog_value = (keys[r][c].sma_sum + (FILTER_SIZE >> 1)) >> FILTER_BITS;
                     }
 
                     keys[r][c].dynamic_actuation = false;
                     keys[r][c].curr_pos = 0;
                     keys[r][c].prev_pos = 0;
                     
-                    uint16_t offset = analogValue / 100;
-                    uint16_t offset_r = analogValue % 100;
+                    uint16_t offset = (analog_value + 50) / 100 * 15; 
 
-                    if (offset_r > 50)
-                        offset += 1;
-
-                    offset = offset * 15;
-
-                    keys[r][c].max_value = analogValue + offset;
-                    keys[r][c].min_value = analogValue + 3;
-
+                    keys[r][c].max_value = analog_value + offset;
+                    keys[r][c].min_value = analog_value + 3;
                 }
             }
             wait_ms(5);
@@ -224,57 +198,32 @@ uint8_t matrix_scan(void) {
         
         for (uint8_t row_index = 0; row_index < ROWS_PER_HAND; row_index++) {
             analog_key_t *key = &keys[row_index][col_index];
-            uint16_t analogValue = analogReadPin(row_pins[row_index]);
+            uint16_t analog_value = analogReadPin(row_pins[row_index]);
 
             key_config_t *config = &user_config.key_config[row_index + thisHand][col_index]; 
             
             // key->sma_sum -= key->sma_filter[filter_index];
-            // key->sma_filter[filter_index] = analogValue;
-            // key->sma_sum += analogValue;
-
-            // uint16_t analog_r = key->sma_sum % FILTER_SIZE;
-            // if (analog_r > FILTER_SIZE >> 1) {
-            //     analogValue = (key->sma_sum + (FILTER_SIZE >> 1)) >> FILTER_BITS;
-            // } else {
-            //     analogValue = (key->sma_sum) >> FILTER_BITS;
-            // }
+            // key->sma_filter[filter_index] = analog_value;
+            // key->sma_sum += analog_value;
+            // analog_value = (key->sma_sum + (FILTER_SIZE >> 1)) >> FILTER_BITS;
 
             #if defined(DEBUG_MATRIX_SCAN_RATE)
-            key->test_value = analogValue;
+            key->test_value = analog_value;
             #endif
 
-            if (analogValue > key->max_value + MIN_MAX_BUFFER)
-                key->max_value = analogValue;
+            if (analog_value > key->max_value + MIN_MAX_BUFFER)
+                key->max_value = analog_value;
             else
-                analogValue = MIN(MAX(key->min_value, analogValue), key->max_value);
+                analog_value = MIN(MAX(key->min_value, analog_value), key->max_value);
 
             // Calculate current position
-
-            uint16_t curr_value;
-
-            curr_value = analogValue - key->min_value;
-            
+            uint32_t curr_value = analog_value - key->min_value;
             uint16_t range = key->max_value - key->min_value;
+            uint16_t norm_value = ((curr_value << 10) + (range >> 1)) / range;
 
-            uint16_t norm_value;
-            uint16_t norm_value_r = (uint32_t)(curr_value << 10) % range;
-
-            if (norm_value_r > range >> 1) {
-                norm_value = ((uint32_t)(curr_value << 10) + (range >> 1)) / range;
-            } else {
-                norm_value = (uint32_t)(curr_value << 10) / range;
-            }
-
-            switch(user_config.travel_distance) {
-                case 340:
-                    key->curr_pos = geon_raw_he[norm_value];
-                    break;
-                case 350:
-                    key->curr_pos = gateron_magnetic_jade[norm_value];
-                    break;
-            }
+            key->curr_pos = ((uint32_t)lut[norm_value] * user_config.travel_distance + 512) >> 10;
             
-            if (row_index == 0 || row_index == 2) {
+            if (row_index == 0 || row_index == 2) { ////////////////////////////////////////////////////////////////////////////////////////
                 key->curr_pos = 0;
             }
 
@@ -299,19 +248,15 @@ uint8_t matrix_scan(void) {
                             key->prev_pos = key->curr_pos;
                         }
                     }
-                    uint16_t reset_point = config->actuation_point - 10;
-                    if (config->mode == 2) {
-                        reset_point = 0;
-                    }
-                    if (key->curr_pos <= reset_point) {
+                    if ((config->mode == 1 && key->curr_pos <= config->actuation_point - 10) || (config->mode == 2 && key->curr_pos == 0)) {
                         // Key is above reset point
                         curr_matrix[row_index] &= ~(1 << col_index);
-                        key->prev_pos = key->curr_pos;
+                        key->prev_pos = key->curr_pos; //
                         key->dynamic_actuation = false;
-                    } 
+                    }
                 } else if (key->curr_pos > config->actuation_point) {
                     curr_matrix[row_index] |= (1 << col_index);
-                    key->prev_pos = key->curr_pos;
+                    key->prev_pos = key->curr_pos; //
                     key->dynamic_actuation = true;
                 }
             } else {
@@ -410,29 +355,29 @@ uint8_t matrix_scan(void) {
         uprintf("(%u, %u)\n\n", keys[2][3].max_value, keys[2][3].test_value);
         */
         uprintf("matrix scan rate: %lu\n", get_matrix_scan_rate());
-        // uprintf("(%u, %u, %u)\n", keys[1][4].curr_pos, keys[1][4].test_value, keys[1][4].min_value);
-        // uprintf("(%u, %u, %u)\n", keys[1][2].curr_pos, keys[1][2].test_value, keys[1][2].min_value);
-        // uprintf("(%u, %u, %u)\n", keys[1][8].curr_pos, keys[1][8].test_value, keys[1][8].min_value);
-        // uprintf("(%u, %u, %u)\n", keys[1][7].curr_pos, keys[1][7].test_value, keys[1][7].min_value);
-        // uprintf("(%u, %u, %u)\n", keys[1][6].curr_pos, keys[1][6].test_value, keys[1][6].min_value);
-        // uprintf("(%u, %u, %u)\n", keys[1][5].curr_pos, keys[1][5].test_value, keys[1][5].min_value);
-        // uprintf("(%u, %u, %u)\n", keys[1][3].curr_pos, keys[1][3].test_value, keys[1][3].min_value);
-        // uprintf("(%u, %u, %u)\n", keys[1][1].curr_pos, keys[1][1].test_value, keys[1][1].min_value);
-        // uprintf("(%u, %u, %u)\n", keys[1][9].curr_pos, keys[1][9].test_value, keys[1][9].min_value);
-        // uprintf("(%u, %u, %u)\n\n", keys[1][0].curr_pos, keys[1][0].test_value, keys[1][0].min_value);
+        uprintf("(%u, %u, %u)\n", keys[1][4].curr_pos, keys[1][4].test_value, keys[1][4].min_value);
+        uprintf("(%u, %u, %u)\n", keys[1][2].curr_pos, keys[1][2].test_value, keys[1][2].min_value);
+        uprintf("(%u, %u, %u)\n", keys[1][8].curr_pos, keys[1][8].test_value, keys[1][8].min_value);
+        uprintf("(%u, %u, %u)\n", keys[1][7].curr_pos, keys[1][7].test_value, keys[1][7].min_value);
+        uprintf("(%u, %u, %u)\n", keys[1][6].curr_pos, keys[1][6].test_value, keys[1][6].min_value);
+        uprintf("(%u, %u, %u)\n", keys[1][5].curr_pos, keys[1][5].test_value, keys[1][5].min_value);
+        uprintf("(%u, %u, %u)\n", keys[1][3].curr_pos, keys[1][3].test_value, keys[1][3].min_value);
+        uprintf("(%u, %u, %u)\n", keys[1][1].curr_pos, keys[1][1].test_value, keys[1][1].min_value);
+        uprintf("(%u, %u, %u)\n", keys[1][9].curr_pos, keys[1][9].test_value, keys[1][9].min_value);
+        uprintf("(%u, %u, %u)\n\n", keys[1][0].curr_pos, keys[1][0].test_value, keys[1][0].min_value);
 
-        uprintf("(%u, %u)\n", user_config.travel_distance, user_config.sensitivity);
+        // uprintf("(%u, %u)\n", user_config.travel_distance, user_config.sensitivity);
 
-        uprintf("(%u, %u)\n", user_config.key_config[1 + thisHand][4].actuation_point, user_config.key_config[1 + thisHand][4].mode);
-        uprintf("(%u, %u)\n", user_config.key_config[1 + thisHand][2].actuation_point, user_config.key_config[1 + thisHand][2].mode);
-        uprintf("(%u, %u)\n", user_config.key_config[1 + thisHand][8].actuation_point, user_config.key_config[1 + thisHand][8].mode);
-        uprintf("(%u, %u)\n", user_config.key_config[1 + thisHand][7].actuation_point, user_config.key_config[1 + thisHand][7].mode);
-        uprintf("(%u, %u)\n", user_config.key_config[1 + thisHand][6].actuation_point, user_config.key_config[1 + thisHand][6].mode);
-        uprintf("(%u, %u)\n", user_config.key_config[1 + thisHand][5].actuation_point, user_config.key_config[1 + thisHand][5].mode);
-        uprintf("(%u, %u)\n", user_config.key_config[1 + thisHand][3].actuation_point, user_config.key_config[1 + thisHand][3].mode);
-        uprintf("(%u, %u)\n", user_config.key_config[1 + thisHand][1].actuation_point, user_config.key_config[1 + thisHand][1].mode);
-        uprintf("(%u, %u)\n", user_config.key_config[1 + thisHand][9].actuation_point, user_config.key_config[1 + thisHand][9].mode);
-        uprintf("(%u, %u)\n\n", user_config.key_config[1 + thisHand][0].actuation_point, user_config.key_config[1 + thisHand][0].mode);
+        // uprintf("(%u, %u)\n", user_config.key_config[1 + thisHand][4].actuation_point, user_config.key_config[1 + thisHand][4].mode);
+        // uprintf("(%u, %u)\n", user_config.key_config[1 + thisHand][2].actuation_point, user_config.key_config[1 + thisHand][2].mode);
+        // uprintf("(%u, %u)\n", user_config.key_config[1 + thisHand][8].actuation_point, user_config.key_config[1 + thisHand][8].mode);
+        // uprintf("(%u, %u)\n", user_config.key_config[1 + thisHand][7].actuation_point, user_config.key_config[1 + thisHand][7].mode);
+        // uprintf("(%u, %u)\n", user_config.key_config[1 + thisHand][6].actuation_point, user_config.key_config[1 + thisHand][6].mode);
+        // uprintf("(%u, %u)\n", user_config.key_config[1 + thisHand][5].actuation_point, user_config.key_config[1 + thisHand][5].mode);
+        // uprintf("(%u, %u)\n", user_config.key_config[1 + thisHand][3].actuation_point, user_config.key_config[1 + thisHand][3].mode);
+        // uprintf("(%u, %u)\n", user_config.key_config[1 + thisHand][1].actuation_point, user_config.key_config[1 + thisHand][1].mode);
+        // uprintf("(%u, %u)\n", user_config.key_config[1 + thisHand][9].actuation_point, user_config.key_config[1 + thisHand][9].mode);
+        // uprintf("(%u, %u)\n\n", user_config.key_config[1 + thisHand][0].actuation_point, user_config.key_config[1 + thisHand][0].mode);
 
         matrix_timer = timer_now;
     }

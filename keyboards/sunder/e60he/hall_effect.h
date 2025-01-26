@@ -37,17 +37,6 @@ typedef struct {
 } user_config_t;
 
 extern user_config_t user_config;
-
-typedef struct {
-    uint8_t mode;
-    uint8_t sensitivity;
-    uint16_t travel_distance;
-    uint16_t actuation_point;
-} hall_effect_t;
-_Static_assert(sizeof(hall_effect_t) == 6, "Unexpected size of the hall_effect_t structure");
-
-extern hall_effect_t key_settings;
-
 typedef struct {
     bool dynamic_actuation;
     uint16_t curr_pos;
@@ -61,5 +50,4 @@ typedef struct {
     #endif
 } analog_key_t;
 
-extern uint16_t geon_raw_he[];
-extern uint16_t gateron_magnetic_jade[];
+extern uint16_t lut[];
