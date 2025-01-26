@@ -156,120 +156,115 @@ void initialise_hall_sensors(void) {
                     continue;
                 }
 
-                uint16_t analogValue = analogReadPin(row_pins[r]);
+                uint16_t analog_value = analogReadPin(row_pins[r]);
 
                 if (i == 2) {
                     keys[r][c].dynamic_actuation = false;
                     keys[r][c].curr_pos = 0;
                     keys[r][c].prev_pos = 0;
                     
-                    uint16_t offset = analogValue / 200;
-                    uint16_t offset_r = analogValue % 200;
+                    uint16_t offset = (analog_value + 100) / 200;
 
-                    if (offset_r > 100)
-                        offset += 1;
+                    keys[r][c].max_value = analog_value - offset;
 
-                    //analogValue -= offset;
-                    keys[r][c].max_value = analogValue - offset;
+                    if (analog_value >= 2100) {
+                        keys[r][c].value_05 = ((uint32_t)analog_value * 98 + 50) / 100;
+                        keys[r][c].value_10 = ((uint32_t)analog_value * 95 + 50) / 100;
+                        keys[r][c].value_15 = ((uint32_t)analog_value * 92 + 50) / 100;
+                        keys[r][c].value_20 = ((uint32_t)analog_value * 87 + 50) / 100;
+                        keys[r][c].value_25 = ((uint32_t)analog_value * 81 + 50) / 100;
+                        keys[r][c].value_30 = ((uint32_t)analog_value * 72 + 50) / 100;
+                        keys[r][c].min_value = ((uint32_t)analog_value * 72 + 50) / 100 - offset;
 
-                    if (analogValue >= 2100) {
-                        keys[r][c].value_05 = analogValue / 100 * 98 + analogValue % 100 * 98 / 100;
-                        keys[r][c].value_10 = analogValue / 100 * 95 + analogValue % 100 * 95 / 100;
-                        keys[r][c].value_15 = analogValue / 100 * 92 + analogValue % 100 * 92 / 100;
-                        keys[r][c].value_20 = analogValue / 100 * 87 + analogValue % 100 * 87 / 100;
-                        keys[r][c].value_25 = analogValue / 100 * 81 + analogValue % 100 * 81 / 100;
-                        keys[r][c].value_30 = analogValue / 100 * 72 + analogValue % 100 * 72 / 100;
-                        keys[r][c].min_value = analogValue / 100 * 72 + analogValue % 100 * 72 / 100 - analogValue / 200;
+                    } else if (analog_value >= 2000) {
+                        keys[r][c].value_05 = ((uint32_t)analog_value * 98 + 50) / 100;
+                        keys[r][c].value_10 = ((uint32_t)analog_value * 95 + 50) / 100;
+                        keys[r][c].value_15 = ((uint32_t)analog_value * 91 + 50) / 100;
+                        keys[r][c].value_20 = ((uint32_t)analog_value * 86 + 50) / 100;
+                        keys[r][c].value_25 = ((uint32_t)analog_value * 78 + 50) / 100;
+                        keys[r][c].value_30 = ((uint32_t)analog_value * 68 + 50) / 100;
+                        keys[r][c].min_value = ((uint32_t)analog_value * 68 + 50) / 100 - offset;
 
-                    } else if (analogValue >= 2000) {
-                        keys[r][c].value_05 = analogValue / 100 * 98 + analogValue % 100 * 98 / 100;
-                        keys[r][c].value_10 = analogValue / 100 * 95 + analogValue % 100 * 95 / 100;
-                        keys[r][c].value_15 = analogValue / 100 * 91 + analogValue % 100 * 91 / 100;
-                        keys[r][c].value_20 = analogValue / 100 * 86 + analogValue % 100 * 86 / 100;
-                        keys[r][c].value_25 = analogValue / 100 * 78 + analogValue % 100 * 78 / 100;
-                        keys[r][c].value_30 = analogValue / 100 * 68 + analogValue % 100 * 68 / 100;
-                        keys[r][c].min_value = analogValue / 100 * 68 + analogValue % 100 * 68 / 100 - analogValue / 200;
-
-                    } else if (analogValue >= 1900) {
-                        keys[r][c].value_05 = analogValue / 100 * 98 + analogValue % 100 * 98 / 100;
-                        keys[r][c].value_10 = analogValue / 100 * 95 + analogValue % 100 * 95 / 100;
-                        keys[r][c].value_15 = analogValue / 100 * 90 + analogValue % 100 * 90 / 100;
-                        keys[r][c].value_20 = analogValue / 100 * 85 + analogValue % 100 * 85 / 100;
-                        keys[r][c].value_25 = analogValue / 100 * 77 + analogValue % 100 * 77 / 100;
-                        keys[r][c].value_30 = analogValue / 100 * 66 + analogValue % 100 * 66 / 100;
-                        keys[r][c].min_value = analogValue / 100 * 66 + analogValue % 100 * 66 / 100 - analogValue / 200;
+                    } else if (analog_value >= 1900) {
+                        keys[r][c].value_05 = ((uint32_t)analog_value * 98 + 50) / 100;
+                        keys[r][c].value_10 = ((uint32_t)analog_value * 95 + 50) / 100;
+                        keys[r][c].value_15 = ((uint32_t)analog_value * 90 + 50) / 100;
+                        keys[r][c].value_20 = ((uint32_t)analog_value * 85 + 50) / 100;
+                        keys[r][c].value_25 = ((uint32_t)analog_value * 77 + 50) / 100;
+                        keys[r][c].value_30 = ((uint32_t)analog_value * 66 + 50) / 100;
+                        keys[r][c].min_value = ((uint32_t)analog_value * 66 + 50) / 100 - offset;
                         
-                    } else if (analogValue >= 1800) {
-                        keys[r][c].value_05 = analogValue / 100 * 98 + analogValue % 100 * 98 / 100;
-                        keys[r][c].value_10 = analogValue / 100 * 94 + analogValue % 100 * 94 / 100;
-                        keys[r][c].value_15 = analogValue / 100 * 90 + analogValue % 100 * 90 / 100;
-                        keys[r][c].value_20 = analogValue / 100 * 84 + analogValue % 100 * 84 / 100;
-                        keys[r][c].value_25 = analogValue / 100 * 75 + analogValue % 100 * 75 / 100;
-                        keys[r][c].value_30 = analogValue / 100 * 64 + analogValue % 100 * 64 / 100;
-                        keys[r][c].min_value = analogValue / 100 * 64 + analogValue % 100 * 64 / 100 - analogValue / 200;
+                    } else if (analog_value >= 1800) {
+                        keys[r][c].value_05 = ((uint32_t)analog_value * 98 + 50) / 100;
+                        keys[r][c].value_10 = ((uint32_t)analog_value * 94 + 50) / 100;
+                        keys[r][c].value_15 = ((uint32_t)analog_value * 90 + 50) / 100;
+                        keys[r][c].value_20 = ((uint32_t)analog_value * 84 + 50) / 100;
+                        keys[r][c].value_25 = ((uint32_t)analog_value * 75 + 50) / 100;
+                        keys[r][c].value_30 = ((uint32_t)analog_value * 64 + 50) / 100;
+                        keys[r][c].min_value = ((uint32_t)analog_value * 64 + 50) / 100 - offset;
                         
-                    } else if (analogValue >= 1700) {
-                        keys[r][c].value_05 = analogValue / 100 * 98 + analogValue % 100 * 98 / 100;
-                        keys[r][c].value_10 = analogValue / 100 * 94 + analogValue % 100 * 94 / 100;
-                        keys[r][c].value_15 = analogValue / 100 * 89 + analogValue % 100 * 89 / 100;
-                        keys[r][c].value_20 = analogValue / 100 * 84 + analogValue % 100 * 84 / 100;
-                        keys[r][c].value_25 = analogValue / 100 * 75 + analogValue % 100 * 75 / 100;
-                        keys[r][c].value_30 = analogValue / 100 * 66 + analogValue % 100 * 66 / 100;
-                        keys[r][c].min_value = analogValue / 100 * 66 + analogValue % 100 * 66 / 100 - analogValue / 200;
+                    } else if (analog_value >= 1700) {
+                        keys[r][c].value_05 = ((uint32_t)analog_value * 98 + 50) / 100;
+                        keys[r][c].value_10 = ((uint32_t)analog_value * 94 + 50) / 100;
+                        keys[r][c].value_15 = ((uint32_t)analog_value * 89 + 50) / 100;
+                        keys[r][c].value_20 = ((uint32_t)analog_value * 84 + 50) / 100;
+                        keys[r][c].value_25 = ((uint32_t)analog_value * 75 + 50) / 100;
+                        keys[r][c].value_30 = ((uint32_t)analog_value * 66 + 50) / 100;
+                        keys[r][c].min_value = ((uint32_t)analog_value * 66 + 50) / 100 - offset;
                         
-                    } else if (analogValue >= 1650) {
-                        keys[r][c].value_05 = analogValue / 100 * 97 + analogValue % 100 * 97 / 100;
-                        keys[r][c].value_10 = analogValue / 100 * 94 + analogValue % 100 * 94 / 100;
-                        keys[r][c].value_15 = analogValue / 100 * 89 + analogValue % 100 * 89 / 100;
-                        keys[r][c].value_20 = analogValue / 100 * 83 + analogValue % 100 * 83 / 100;
-                        keys[r][c].value_25 = analogValue / 100 * 74 + analogValue % 100 * 74 / 100;
-                        keys[r][c].value_30 = analogValue / 100 * 68 + analogValue % 100 * 68 / 100;
-                        keys[r][c].min_value = analogValue / 100 * 68 + analogValue % 100 * 68 / 100 - analogValue / 200;
+                    } else if (analog_value >= 1650) {
+                        keys[r][c].value_05 = ((uint32_t)analog_value * 97 + 50) / 100;
+                        keys[r][c].value_10 = ((uint32_t)analog_value * 94 + 50) / 100;
+                        keys[r][c].value_15 = ((uint32_t)analog_value * 89 + 50) / 100;
+                        keys[r][c].value_20 = ((uint32_t)analog_value * 83 + 50) / 100;
+                        keys[r][c].value_25 = ((uint32_t)analog_value * 74 + 50) / 100;
+                        keys[r][c].value_30 = ((uint32_t)analog_value * 68 + 50) / 100;
+                        keys[r][c].min_value = ((uint32_t)analog_value * 68 + 50) / 100 - offset;
                         
-                    } else if (analogValue >= 1600) {
-                        keys[r][c].value_05 = analogValue / 100 * 98 + analogValue % 100 * 98 / 100;
-                        keys[r][c].value_10 = analogValue / 100 * 94 + analogValue % 100 * 94 / 100;
-                        keys[r][c].value_15 = analogValue / 100 * 90 + analogValue % 100 * 90 / 100;
-                        keys[r][c].value_20 = analogValue / 100 * 83 + analogValue % 100 * 83 / 100;
-                        keys[r][c].value_25 = analogValue / 100 * 75 + analogValue % 100 * 75 / 100;
-                        keys[r][c].value_30 = analogValue / 100 * 70 + analogValue % 100 * 70 / 100;
-                        keys[r][c].min_value = analogValue / 100 * 70 + analogValue % 100 * 70 / 100 - analogValue / 200;
+                    } else if (analog_value >= 1600) {
+                        keys[r][c].value_05 = ((uint32_t)analog_value * 98 + 50) / 100;
+                        keys[r][c].value_10 = ((uint32_t)analog_value * 94 + 50) / 100;
+                        keys[r][c].value_15 = ((uint32_t)analog_value * 90 + 50) / 100;
+                        keys[r][c].value_20 = ((uint32_t)analog_value * 83 + 50) / 100;
+                        keys[r][c].value_25 = ((uint32_t)analog_value * 75 + 50) / 100;
+                        keys[r][c].value_30 = ((uint32_t)analog_value * 70 + 50) / 100;
+                        keys[r][c].min_value = ((uint32_t)analog_value * 70 + 50) / 100 - offset;
                         
-                    } else if (analogValue >= 1550) {
-                        keys[r][c].value_05 = analogValue / 100 * 98 + analogValue % 100 * 98 / 100;
-                        keys[r][c].value_10 = analogValue / 100 * 94 + analogValue % 100 * 94 / 100;
-                        keys[r][c].value_15 = analogValue / 100 * 89 + analogValue % 100 * 89 / 100;
-                        keys[r][c].value_20 = analogValue / 100 * 82 + analogValue % 100 * 82 / 100;
-                        keys[r][c].value_25 = analogValue / 100 * 75 + analogValue % 100 * 75 / 100;
-                        keys[r][c].value_30 = analogValue / 100 * 71 + analogValue % 100 * 71 / 100;
-                        keys[r][c].min_value = analogValue / 100 * 71 + analogValue % 100 * 71 / 100 - analogValue / 200;
+                    } else if (analog_value >= 1550) {
+                        keys[r][c].value_05 = ((uint32_t)analog_value * 98 + 50) / 100;
+                        keys[r][c].value_10 = ((uint32_t)analog_value * 94 + 50) / 100;
+                        keys[r][c].value_15 = ((uint32_t)analog_value * 89 + 50) / 100;
+                        keys[r][c].value_20 = ((uint32_t)analog_value * 82 + 50) / 100;
+                        keys[r][c].value_25 = ((uint32_t)analog_value * 75 + 50) / 100;
+                        keys[r][c].value_30 = ((uint32_t)analog_value * 71 + 50) / 100;
+                        keys[r][c].min_value = ((uint32_t)analog_value * 71 + 50) / 100 - offset;
                         
-                    } else if (analogValue >= 1500) {
-                        keys[r][c].value_05 = analogValue / 100 * 98 + analogValue % 100 * 98 / 100;
-                        keys[r][c].value_10 = analogValue / 100 * 94 + analogValue % 100 * 94 / 100;
-                        keys[r][c].value_15 = analogValue / 100 * 89 + analogValue % 100 * 89 / 100;
-                        keys[r][c].value_20 = analogValue / 100 * 82 + analogValue % 100 * 82 / 100;
-                        keys[r][c].value_25 = analogValue / 100 * 75 + analogValue % 100 * 75 / 100;
+                    } else if (analog_value >= 1500) {
+                        keys[r][c].value_05 = ((uint32_t)analog_value * 98 + 50) / 100;
+                        keys[r][c].value_10 = ((uint32_t)analog_value * 94 + 50) / 100;
+                        keys[r][c].value_15 = ((uint32_t)analog_value * 89 + 50) / 100;
+                        keys[r][c].value_20 = ((uint32_t)analog_value * 82 + 50) / 100;
+                        keys[r][c].value_25 = ((uint32_t)analog_value * 75 + 50) / 100;
                         keys[r][c].value_30 = 0;
-                        keys[r][c].min_value = analogValue / 100 * 74 + analogValue % 100 * 74 / 100;
+                        keys[r][c].min_value = ((uint32_t)analog_value * 74 + 50) / 100;
                         
-                    } else if (analogValue >= 1400) {
-                        keys[r][c].value_05 = analogValue / 100 * 98 + analogValue % 100 * 98 / 100;
-                        keys[r][c].value_10 = analogValue / 100 * 94 + analogValue % 100 * 94 / 100;
-                        keys[r][c].value_15 = analogValue / 100 * 89 + analogValue % 100 * 89 / 100;
-                        keys[r][c].value_20 = analogValue / 100 * 82 + analogValue % 100 * 82 / 100;
+                    } else if (analog_value >= 1400) {
+                        keys[r][c].value_05 = ((uint32_t)analog_value * 98 + 50) / 100;
+                        keys[r][c].value_10 = ((uint32_t)analog_value * 94 + 50) / 100;
+                        keys[r][c].value_15 = ((uint32_t)analog_value * 89 + 50) / 100;
+                        keys[r][c].value_20 = ((uint32_t)analog_value * 82 + 50) / 100;
                         keys[r][c].value_25 = 0;
                         keys[r][c].value_30 = 0;
-                        keys[r][c].min_value = analogValue / 100 * 78 + analogValue % 100 * 78 / 100;
+                        keys[r][c].min_value = ((uint32_t)analog_value * 78 + 50) / 100;
                         
                     } else {
-                        keys[r][c].value_05 = analogValue / 100 * 98 + analogValue % 100 * 98 / 100;
-                        keys[r][c].value_10 = analogValue / 100 * 94 + analogValue % 100 * 94 / 100;
-                        keys[r][c].value_15 = analogValue / 100 * 89 + analogValue % 100 * 89 / 100;
+                        keys[r][c].value_05 = ((uint32_t)analog_value * 98 + 50) / 100;
+                        keys[r][c].value_10 = ((uint32_t)analog_value * 94 + 50) / 100;
+                        keys[r][c].value_15 = ((uint32_t)analog_value * 89 + 50) / 100;
                         keys[r][c].value_20 = 0;
                         keys[r][c].value_25 = 0;
                         keys[r][c].value_30 = 0;
-                        keys[r][c].min_value = analogValue / 100 * 85 + analogValue % 100 * 85 / 100;
+                        keys[r][c].min_value = ((uint32_t)analog_value * 85 + 50) / 100;
                         
                     }
                 }
@@ -323,18 +318,18 @@ uint8_t matrix_scan(void) {
             }
 
             analog_key_t *key = &keys[row_index][col_index];
-            uint16_t analogValue = analogReadPin(row_pins[row_index]);
+            uint16_t analog_value = analogReadPin(row_pins[row_index]);
 
             key_config_t *config = &user_config.key_config[row_index + thisHand][col_index]; 
             
             #if defined(DEBUG_MATRIX_SCAN_RATE)
-            key->test_value = analogValue;
+            key->test_value = analog_value;
             #endif
 
-            if (analogValue < key->min_value - MIN_MAX_BUFFER)
-                key->min_value = analogValue;
+            if (analog_value < key->min_value - MIN_MAX_BUFFER)
+                key->min_value = analog_value;
             else
-                analogValue = MIN(MAX(key->min_value, analogValue), key->max_value);
+                analog_value = MIN(MAX(key->min_value, analog_value), key->max_value);
 
             // Calculate current position
             uint16_t upper_limit;
@@ -344,117 +339,117 @@ uint8_t matrix_scan(void) {
             uint16_t travel_range = 50;
 
             if (key->max_value >= 1550) {
-                if (analogValue > key->value_05) {
-                    curr_value = key->max_value - analogValue;
+                if (analog_value > key->value_05) {
+                    curr_value = key->max_value - analog_value;
                     upper_limit = key->max_value;
                     lower_limit = key->value_05;
-                } else if (analogValue > key->value_10) {
-                    curr_value = key->value_05 - analogValue;
+                } else if (analog_value > key->value_10) {
+                    curr_value = key->value_05 - analog_value;
                     upper_limit = key->value_05;
                     lower_limit = key->value_10;
                     travel_offset = 50;
-                } else if (analogValue > key->value_15) {
-                    curr_value = key->value_10 - analogValue;
+                } else if (analog_value > key->value_15) {
+                    curr_value = key->value_10 - analog_value;
                     upper_limit = key->value_10;
                     lower_limit = key->value_15;
                     travel_offset = 100;
-                } else if (analogValue > key->value_20) {
-                    curr_value = key->value_15 - analogValue;
+                } else if (analog_value > key->value_20) {
+                    curr_value = key->value_15 - analog_value;
                     upper_limit = key->value_15;
                     lower_limit = key->value_20;
                     travel_offset = 150;
-                } else if (analogValue > key->value_25) {
-                    curr_value = key->value_20 - analogValue;
+                } else if (analog_value > key->value_25) {
+                    curr_value = key->value_20 - analog_value;
                     upper_limit = key->value_20;
                     lower_limit = key->value_25;
                     travel_offset = 200;
-                } else if (analogValue > key->value_30) {
-                    curr_value = key->value_25 - analogValue;
+                } else if (analog_value > key->value_30) {
+                    curr_value = key->value_25 - analog_value;
                     upper_limit = key->value_25;
                     lower_limit = key->value_30;
                     travel_offset = 250;
                 } else {
-                    curr_value = key->value_30 - analogValue;
+                    curr_value = key->value_30 - analog_value;
                     upper_limit = key->value_30;
                     lower_limit = key->min_value;
                     travel_offset = 300;
                 }
             } else if (key->max_value >= 1500) {
-                if (analogValue > key->value_05) {
-                    curr_value = key->max_value - analogValue;
+                if (analog_value > key->value_05) {
+                    curr_value = key->max_value - analog_value;
                     upper_limit = key->max_value;
                     lower_limit = key->value_05;
-                } else if (analogValue > key->value_10) {
-                    curr_value = key->value_05 - analogValue;
+                } else if (analog_value > key->value_10) {
+                    curr_value = key->value_05 - analog_value;
                     upper_limit = key->value_05;
                     lower_limit = key->value_10;
                     travel_offset = 50;
-                } else if (analogValue > key->value_15) {
-                    curr_value = key->value_10 - analogValue;
+                } else if (analog_value > key->value_15) {
+                    curr_value = key->value_10 - analog_value;
                     upper_limit = key->value_10;
                     lower_limit = key->value_15;
                     travel_offset = 100;
-                } else if (analogValue > key->value_20) {
-                    curr_value = key->value_15 - analogValue;
+                } else if (analog_value > key->value_20) {
+                    curr_value = key->value_15 - analog_value;
                     upper_limit = key->value_15;
                     lower_limit = key->value_20;
                     travel_offset = 150;
-                } else if (analogValue > key->value_25) {
-                    curr_value = key->value_20 - analogValue;
+                } else if (analog_value > key->value_25) {
+                    curr_value = key->value_20 - analog_value;
                     upper_limit = key->value_20;
                     lower_limit = key->value_25;
                     travel_offset = 200;
                 } else {
-                    curr_value = key->value_25 - analogValue;
+                    curr_value = key->value_25 - analog_value;
                     upper_limit = key->value_25;
                     lower_limit = key->min_value;
                     travel_offset = 250;
                     travel_range = 100;
                 }
             } else if (key->max_value >= 1400) {
-                if (analogValue > key->value_05) {
-                    curr_value = key->max_value - analogValue;
+                if (analog_value > key->value_05) {
+                    curr_value = key->max_value - analog_value;
                     upper_limit = key->max_value;
                     lower_limit = key->value_05;
-                } else if (analogValue > key->value_10) {
-                    curr_value = key->value_05 - analogValue;
+                } else if (analog_value > key->value_10) {
+                    curr_value = key->value_05 - analog_value;
                     upper_limit = key->value_05;
                     lower_limit = key->value_10;
                     travel_offset = 50;
-                } else if (analogValue > key->value_15) {
-                    curr_value = key->value_10 - analogValue;
+                } else if (analog_value > key->value_15) {
+                    curr_value = key->value_10 - analog_value;
                     upper_limit = key->value_10;
                     lower_limit = key->value_15;
                     travel_offset = 100;
-                } else if (analogValue > key->value_20) {
-                    curr_value = key->value_15 - analogValue;
+                } else if (analog_value > key->value_20) {
+                    curr_value = key->value_15 - analog_value;
                     upper_limit = key->value_15;
                     lower_limit = key->value_20;
                     travel_offset = 150;
                 } else {
-                    curr_value = key->value_20 - analogValue;
+                    curr_value = key->value_20 - analog_value;
                     upper_limit = key->value_20;
                     lower_limit = key->min_value;
                     travel_offset = 200;
                     travel_range = 150;
                 }
             } else {
-                if (analogValue > key->value_05) {
-                    curr_value = key->max_value - analogValue;
+                if (analog_value > key->value_05) {
+                    curr_value = key->max_value - analog_value;
                     upper_limit = key->max_value;
                     lower_limit = key->value_05;
-                } else if (analogValue > key->value_10) {
-                    curr_value = key->value_05 - analogValue;
+                } else if (analog_value > key->value_10) {
+                    curr_value = key->value_05 - analog_value;
                     upper_limit = key->value_05;
                     lower_limit = key->value_10;
                     travel_offset = 50;
-                } else if (analogValue > key->value_15) {
-                    curr_value = key->value_10 - analogValue;
+                } else if (analog_value > key->value_15) {
+                    curr_value = key->value_10 - analog_value;
                     upper_limit = key->value_10;
                     lower_limit = key->value_15;
                     travel_offset = 100;
                 } else {
-                    curr_value = key->value_15 - analogValue;
+                    curr_value = key->value_15 - analog_value;
                     upper_limit = key->value_15;
                     lower_limit = key->min_value;
                     travel_offset = 150;
@@ -462,19 +457,7 @@ uint8_t matrix_scan(void) {
                 }
             }
 
-            key->curr_pos = travel_range * (curr_value) / (upper_limit - lower_limit) + travel_offset;
-            uint16_t curr_pos_r = travel_range * (curr_value) % (upper_limit - lower_limit);
-
-            if (curr_pos_r > (upper_limit - lower_limit) >> 1)
-                key->curr_pos += 1;
-
-            uint16_t reset_point = config->actuation_point - 10;
-            if (config->mode == 2) {
-                reset_point = 10;
-                if (config->actuation_point == 10) {
-                    reset_point = 0;
-                }
-            }
+            key->curr_pos = ((uint32_t)travel_range * curr_value + ((upper_limit - lower_limit) >> 1)) / (upper_limit - lower_limit) + travel_offset;
 
             // Update key states
             if (config->mode != 0) {
@@ -497,7 +480,7 @@ uint8_t matrix_scan(void) {
                             key->prev_pos = key->curr_pos;
                         }
                     }
-                    if (key->curr_pos <= reset_point) {
+                    if ((config->mode == 1 && key->curr_pos <= config->actuation_point - 10) || (config->mode == 2 && key->curr_pos <= (config->actuation_point == 10 ? 0 : 10))) {
                         // Key is above reset point
                         curr_matrix[row_index] &= ~(1 << col_index);
                         key->prev_pos = key->curr_pos;
