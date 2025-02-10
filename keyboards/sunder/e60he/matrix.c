@@ -222,10 +222,6 @@ uint8_t matrix_scan(void) {
             uint16_t norm_value = ((curr_value << 10) + (range >> 1)) / range;
 
             key->curr_pos = ((uint32_t)lut[norm_value] * user_config.travel_distance + 512) >> 10;
-            
-            if (row_index == 0 || row_index == 2) { ////////////////////////////////////////////////////////////////////////////////////////
-                key->curr_pos = 0;
-            }
 
             // Update key states
             if (config->mode != 0) {
@@ -282,89 +278,53 @@ uint8_t matrix_scan(void) {
     uint32_t timer_now = timer_read32();
     
     if (TIMER_DIFF_32(timer_now, matrix_timer) >= 500) {
-        /*
         uprintf("matrix scan rate: %lu\n", get_matrix_scan_rate());
+
+        uprintf("(%u, %u) ", keys[0][8].min_value, keys[0][8].test_value);
+        uprintf("(%u, %u) ", keys[0][7].min_value, keys[0][7].test_value);
+        uprintf("(%u, %u) ", keys[0][6].min_value, keys[0][6].test_value);
+        uprintf("(%u, %u) ", keys[0][5].min_value, keys[0][5].test_value);
+        uprintf("(%u, %u) ", keys[0][4].min_value, keys[0][4].test_value);
+        uprintf("(%u, %u)\n", keys[0][3].min_value, keys[0][3].test_value);
+
+        uprintf("(%u, %u) ", keys[0][9].min_value, keys[0][9].test_value);
+        uprintf("(%u, %u) ", keys[0][0].min_value, keys[0][0].test_value);
+        uprintf("(%u, %u) ", keys[0][1].min_value, keys[0][1].test_value);
+        uprintf("(%u, %u) ", keys[0][2].min_value, keys[0][2].test_value);
+        uprintf("(%u, %u) ", keys[1][4].min_value, keys[1][4].test_value);
+        uprintf("(%u, %u)\n", keys[1][2].min_value, keys[1][2].test_value);
+
+        uprintf("(%u, %u) ", keys[1][8].min_value, keys[1][8].test_value);
+        uprintf("(%u, %u) ", keys[1][7].min_value, keys[1][7].test_value);
+        uprintf("(%u, %u) ", keys[1][6].min_value, keys[1][6].test_value);
+        uprintf("(%u, %u) ", keys[1][5].min_value, keys[1][5].test_value);
+        uprintf("(%u, %u) ", keys[1][3].min_value, keys[1][3].test_value);
+        uprintf("(%u, %u)\n", keys[1][1].min_value, keys[1][1].test_value);
+
+        uprintf("(%u, %u) ", keys[1][9].min_value, keys[1][9].test_value);
+        uprintf("(%u, %u) ", keys[1][0].min_value, keys[1][0].test_value);
+        uprintf("(%u, %u) ", keys[2][7].min_value, keys[2][7].test_value);
+        uprintf("(%u, %u) ", keys[2][6].min_value, keys[2][6].test_value);
+        uprintf("(%u, %u) ", keys[2][5].min_value, keys[2][5].test_value);
+        uprintf("(%u, %u)\n", keys[2][4].min_value, keys[2][4].test_value);
+
+        uprintf("(%u, %u) ", keys[2][8].min_value, keys[2][8].test_value);
+        uprintf("(%u, %u) ", keys[2][9].min_value, keys[2][9].test_value);
+        uprintf("(%u, %u) ", keys[2][0].min_value, keys[2][0].test_value);
+        uprintf("(%u, %u) ", keys[2][1].min_value, keys[2][1].test_value);
+        uprintf("(%u, %u) ", keys[2][2].min_value, keys[2][2].test_value);
+        uprintf("(%u, %u)\n\n", keys[2][3].min_value, keys[2][3].test_value);
         
-        for (uint8_t row_index = 0; row_index < ROWS_PER_HAND; row_index++) {
-            // for (uint8_t col_index = 0; col_index < MATRIX_COLS; col_index++) {
-            //     uprintf("[(%u,%u): %u] ", row_index, col_index, keys[row_index][col_index].test_value);
-            // }
-
-            uprintf("[");
-            for (uint8_t col_index = 0; col_index < MATRIX_COLS; col_index++) {
-                uprintf("(%u, %u) ", keys[row_index][col_index].max_value, keys[row_index][col_index].test_value);
-            }
-            uprintf("]");
-            
-            // uprintf("[");
-            // for (uint8_t col_index = 0; col_index < MATRIX_COLS; col_index++) {
-            //     uprintf("(%u, %u, %u) ", keys[row_index][col_index].max_value, keys[row_index][col_index].test_value, keys[row_index][col_index].curr_pos);
-            // }
-            // uprintf("]");
-
-            // uprintf("[");
-            // for (uint8_t col_index = 0; col_index < MATRIX_COLS; col_index++) {
-            //     uprintf("%u ", keys[row_index][col_index].curr_pos);
-            // }
-            // uprintf("]");
-            
-            uprintf("\n");
-        }
-
-        // uprintf("mode: %u\n", key_settings.mode);
-        // uprintf("sensitivity: %u\n", key_settings.sensitivity);
-        // uprintf("travel distance: %u\n", key_settings.travel_distance);
-        // uprintf("actuation point: %u\n", key_settings.actuation_point);
-
-        // uprintf("size: %u\n", sizeof(hall_effect_t));
-        
-
-        uprintf("(%u, %u) ", keys[0][8].max_value, keys[0][8].test_value);
-        uprintf("(%u, %u) ", keys[0][7].max_value, keys[0][7].test_value);
-        uprintf("(%u, %u) ", keys[0][6].max_value, keys[0][6].test_value);
-        uprintf("(%u, %u) ", keys[0][5].max_value, keys[0][5].test_value);
-        uprintf("(%u, %u) ", keys[0][4].max_value, keys[0][4].test_value);
-        uprintf("(%u, %u)\n", keys[0][3].max_value, keys[0][3].test_value);
-
-        uprintf("(%u, %u) ", keys[0][9].max_value, keys[0][9].test_value);
-        uprintf("(%u, %u) ", keys[0][0].max_value, keys[0][0].test_value);
-        uprintf("(%u, %u) ", keys[0][1].max_value, keys[0][1].test_value);
-        uprintf("(%u, %u) ", keys[0][2].max_value, keys[0][2].test_value);
-        uprintf("(%u, %u) ", keys[1][4].max_value, keys[1][4].test_value);
-        uprintf("(%u, %u)\n", keys[1][2].max_value, keys[1][2].test_value);
-
-        uprintf("(%u, %u) ", keys[1][8].max_value, keys[1][8].test_value);
-        uprintf("(%u, %u) ", keys[1][7].max_value, keys[1][7].test_value);
-        uprintf("(%u, %u) ", keys[1][6].max_value, keys[1][6].test_value);
-        uprintf("(%u, %u) ", keys[1][5].max_value, keys[1][5].test_value);
-        uprintf("(%u, %u) ", keys[1][3].max_value, keys[1][3].test_value);
-        uprintf("(%u, %u)\n", keys[1][1].max_value, keys[1][1].test_value);
-
-        uprintf("(%u, %u) ", keys[1][9].max_value, keys[1][9].test_value);
-        uprintf("(%u, %u) ", keys[1][0].max_value, keys[1][0].test_value);
-        uprintf("(%u, %u) ", keys[2][7].max_value, keys[2][7].test_value);
-        uprintf("(%u, %u) ", keys[2][6].max_value, keys[2][6].test_value);
-        uprintf("(%u, %u) ", keys[2][5].max_value, keys[2][5].test_value);
-        uprintf("(%u, %u)\n", keys[2][4].max_value, keys[2][4].test_value);
-
-        uprintf("(%u, %u) ", keys[2][8].max_value, keys[2][8].test_value);
-        uprintf("(%u, %u) ", keys[2][9].max_value, keys[2][9].test_value);
-        uprintf("(%u, %u) ", keys[2][0].max_value, keys[2][0].test_value);
-        uprintf("(%u, %u) ", keys[2][1].max_value, keys[2][1].test_value);
-        uprintf("(%u, %u) ", keys[2][2].max_value, keys[2][2].test_value);
-        uprintf("(%u, %u)\n\n", keys[2][3].max_value, keys[2][3].test_value);
-        */
-        uprintf("matrix scan rate: %lu\n", get_matrix_scan_rate());
-        uprintf("(%u, %u, %u)\n", keys[1][4].curr_pos, keys[1][4].test_value, keys[1][4].min_value);
-        uprintf("(%u, %u, %u)\n", keys[1][2].curr_pos, keys[1][2].test_value, keys[1][2].min_value);
-        uprintf("(%u, %u, %u)\n", keys[1][8].curr_pos, keys[1][8].test_value, keys[1][8].min_value);
-        uprintf("(%u, %u, %u)\n", keys[1][7].curr_pos, keys[1][7].test_value, keys[1][7].min_value);
-        uprintf("(%u, %u, %u)\n", keys[1][6].curr_pos, keys[1][6].test_value, keys[1][6].min_value);
-        uprintf("(%u, %u, %u)\n", keys[1][5].curr_pos, keys[1][5].test_value, keys[1][5].min_value);
-        uprintf("(%u, %u, %u)\n", keys[1][3].curr_pos, keys[1][3].test_value, keys[1][3].min_value);
-        uprintf("(%u, %u, %u)\n", keys[1][1].curr_pos, keys[1][1].test_value, keys[1][1].min_value);
-        uprintf("(%u, %u, %u)\n", keys[1][9].curr_pos, keys[1][9].test_value, keys[1][9].min_value);
-        uprintf("(%u, %u, %u)\n\n", keys[1][0].curr_pos, keys[1][0].test_value, keys[1][0].min_value);
+        // uprintf("(%u, %u, %u)\n", keys[1][4].curr_pos, keys[1][4].test_value, keys[1][4].min_value);
+        // uprintf("(%u, %u, %u)\n", keys[1][2].curr_pos, keys[1][2].test_value, keys[1][2].min_value);
+        // uprintf("(%u, %u, %u)\n", keys[1][8].curr_pos, keys[1][8].test_value, keys[1][8].min_value);
+        // uprintf("(%u, %u, %u)\n", keys[1][7].curr_pos, keys[1][7].test_value, keys[1][7].min_value);
+        // uprintf("(%u, %u, %u)\n", keys[1][6].curr_pos, keys[1][6].test_value, keys[1][6].min_value);
+        // uprintf("(%u, %u, %u)\n", keys[1][5].curr_pos, keys[1][5].test_value, keys[1][5].min_value);
+        // uprintf("(%u, %u, %u)\n", keys[1][3].curr_pos, keys[1][3].test_value, keys[1][3].min_value);
+        // uprintf("(%u, %u, %u)\n", keys[1][1].curr_pos, keys[1][1].test_value, keys[1][1].min_value);
+        // uprintf("(%u, %u, %u)\n", keys[1][9].curr_pos, keys[1][9].test_value, keys[1][9].min_value);
+        // uprintf("(%u, %u, %u)\n\n", keys[1][0].curr_pos, keys[1][0].test_value, keys[1][0].min_value);
 
         // uprintf("(%u, %u)\n", user_config.travel_distance, user_config.sensitivity);
 
