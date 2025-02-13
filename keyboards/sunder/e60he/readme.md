@@ -1,8 +1,8 @@
 # Sunder E60 HE
 
-![Sunder E60 HE](https://i.imgur.com/5FkyZsX.jpeg)
+![Sunder E60 HE]()
 
-A hall effect split keyboard that is compatible with Gateron KS-20T (Magnetic Jade) hall effect switch.
+A Hall effect split keyboard that is compatible with GEON Raw HE and Gateron Magnetic Jade switches.
 
 * Keyboard Maintainer: [squishyliquid](https://github.com/squishyliquid)
 * Hardware Supported: Sunder E60 HE
@@ -18,6 +18,6 @@ See the [build environment setup](https://docs.qmk.fm/#/getting_started_build_to
 
 Enter the bootloader in 3 ways:
 
-* **Bootmagic reset**: Hold down `ESC`+`DEL` and plug in left half to reset. Hold down `Backspace`+`Backslash` and plug in right half to reset.
+* **Bootmagic reset**: Hold down `ESC` and plug in left half to reset. Hold down `Backspace` and plug in right half to reset.
 * **Physical reset button**: Hold down the button on the back of the PCB and plug in
 * **Keycode in layout**: Press the key mapped to `QK_BOOT` if available
